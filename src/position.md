@@ -136,7 +136,25 @@ Other options may be better when:
 - Strict logical-time consistency is prioritized over execution performance.
 
 ## 10. Technical Comparison Matrix (Reference)
-The following table summarizes the design focus of HLA, FMI, and Hakoniwa.
+
+The following table summarizes the fundamental design assumptions and evaluation
+axes of HLA, FMI (Co-Simulation), and Hakoniwa.
+
+| Aspect | HLA | FMI (Co-Simulation) | Hakoniwa |
+|------|-----|----------------------|----------|
+| Primary focus | Logical time & causality control | Model exchange & coupling | Execution responsibility in distributed execution |
+| Time management | Strict global logical time | Delegated to Master Algorithm | Bounded drift (d_max, 2·d_max) |
+| Global time consistency | Required | Not specified | Not required |
+| Real-time performance | Secondary | Depends on MA | Primary |
+| Handling of time drift | Prevented by synchronization | Delegated to MA | Accepted and bounded |
+| Execution responsibility | Implicit in RTI ordering | Not defined | Explicit (Owner / Epoch) |
+| Responsibility switching | Not a primary concept | Not defined | Core mechanism (RD) |
+| Causality fixation | Time-based ordering | Tool-dependent | Commit Point (semantic boundary) |
+| Reproducibility | High | Tool-dependent | Not guaranteed |
+| Dynamic reconfiguration | Costly | Tool-dependent | Assumed and supported |
+| Numerical method selection | Framework-level | User / MA-defined | User-defined |
+| Target use cases | Scientific / event-driven simulation | Model integration | Real-time, adaptive, distributed execution |
+
 
 ## 11. Positioning Summary
 Hakoniwa is a distributed simulation execution platform that:
