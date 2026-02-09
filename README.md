@@ -48,8 +48,9 @@ Those belong to individual component repositories
 
 ## Document Structure (Planned)
 
-- `src/`
-  - Core design documents (Markdown, authoritative)
+- `src/`: Core design documents (Markdown, authoritative)
+- Positioning document: [Hakoniwa positioning](src/position.md) (`src/position.md`)
+- Glossary: [Hakoniwa glossary](src/glossary.md) (`src/glossary.md`)
 - `src/proofs/`
   - Mathematical proofs and formal reasoning
 - `diagrams/`
