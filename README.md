@@ -51,6 +51,10 @@ Those belong to individual component repositories
 - `src/`: Core design documents (Markdown, authoritative)
 - Positioning document: [Hakoniwa positioning](src/position.md) (`src/position.md`)
 - Glossary: [Hakoniwa glossary](src/glossary.md) (`src/glossary.md`)
+- Architecture overview (Normative): [Hakoniwa Architecture Overview](src/architecture/overview.md) (`src/architecture/overview.md`)
+- Core functions (Normative): [Hakoniwa Core Functions (Minimum Semantics)](src/architecture/core-functions.md) (`src/architecture/core-functions.md`)
+- Repository mapping (Appendix): [Repository Mapping](src/architecture/repository-mapping.md) (`src/architecture/repository-mapping.md`)
+- Diagrams (Informative): [Diagram Index](src/architecture/diagrams.md) (`src/architecture/diagrams.md`)
 - `src/proofs/`
   - Mathematical proofs and formal reasoning
 - `diagrams/`
