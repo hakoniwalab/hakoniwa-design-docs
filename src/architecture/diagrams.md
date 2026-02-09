@@ -1,15 +1,15 @@
-# Diagram Index
+# 図版一覧
 
 (Informative)
 
-This chapter lists the diagrams to be maintained and provides placeholders.
+本章は、今後維持する図版の一覧とプレースホルダを示す。
 
-## Planned Diagrams
-- Stack (layered) diagram
-- Data Plane / Control Plane flow diagram
-- Runtime topology diagram
+## 予定する図版
+- スタック（層）図
+- Data Plane / Control Plane フロー図
+- ランタイムトポロジ図
 
-## Stack (Layered) Diagram (Placeholder)
+## スタック（層）図（プレースホルダ）
 ```mermaid
 flowchart TB
   L0[Hardware / OS]
@@ -21,9 +21,9 @@ flowchart TB
   L0 --> L1 --> L2 --> L3 --> L4
 ```
 
-Caption: A stack view showing Hakoniwa’s major conceptual layers and responsibility boundaries.
+キャプション: 概念構造を示すスタック図であり、配置や実行環境の具体を表すものではない。Registry は構成情報の保持ロールであり、意味論の権威ではない。
 
-## Data Plane / Control Plane Flow Diagram (Placeholder)
+## Data Plane / Control Plane フロー図（プレースホルダ）
 ```mermaid
 flowchart LR
   subgraph DataPlane[Data Plane]
@@ -43,4 +43,4 @@ flowchart LR
   BRG <--> COND
 ```
 
-Caption: Bridge connects across the boundary between Data Plane and Control Plane.
+キャプション: 概念的な平面分離と境界横断を示す図であり、配置やネットワーク構成の具体を表すものではない。Registry は構成情報の保持ロールであり、意味論の権威ではない。
