@@ -54,4 +54,7 @@ pandoc "$combined_md" \
   -c "$css_path" \
   -o "$output_html"
 
+# Patch pandoc default CSS that WeasyPrint cannot parse
+perl -0pi -e 's/gap: min\\(4vw, 1\\.5em\\);/gap: 1.5em;/g; s/overflow-x: auto;/overflow: visible;/g' "$output_html"
+
 echo "Generated: $output_html"

@@ -87,3 +87,14 @@ hr {
 img {
   max-width: 100%;
 }
+
+/* Override pandoc default column styles for WeasyPrint compatibility */
+div.columns {
+  display: flex;
+  gap: 1.5em;
+}
+
+div.column {
+  flex: auto;
+  overflow: visible;
+}
