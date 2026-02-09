@@ -60,7 +60,7 @@ The following are design roles, not repository names.
 - Endpoint defines causality boundaries and delivery/lifetime semantics.
 
 ## Causality Boundary (Definition)
-Causality Boundary is a design boundary that fixes, without ambiguity, which data and events are attributed to which execution responsibility (Owner) and generation (Epoch). It is enforced through Endpoint semantics (delivery and lifetime) and is semantically fixed at Commit Points, independent of physical start timing (e.g., even if network delay reorders arrivals, attribution remains fixed by Owner/Epoch and Commit Point boundaries).
+Causality Boundary is a design boundary that fixes, without ambiguity, which data and events are attributed to which execution responsibility (Owner) and generation (Epoch). It is enforced through Endpoint semantics (delivery and lifetime) and is semantically fixed at Commit Points, independent of physical start timing (e.g., even if network delay reorders arrivals, attribution remains fixed by Owner/Epoch and Commit Point boundaries). This removes reliance on physical clock alignment and fixes ordering and responsibility through Epoch and Commit Point semantics.
 
 ### Out of Scope (Architecture Level)
 - Selection of numerical solvers and optimization policies
