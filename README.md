@@ -49,19 +49,20 @@ Those belong to individual component repositories
 ## Document Structure (Planned)
 
 - `src/`: Core design documents (Markdown, authoritative)
-- Positioning document: [Hakoniwa positioning](src/position.md) (`src/position.md`)
-- Glossary: [Hakoniwa glossary](src/glossary.md) (`src/glossary.md`)
-- Architecture overview (Normative): [Hakoniwa Architecture Overview](src/architecture/overview.md) (`src/architecture/overview.md`)
-- Core functions (Normative): [Hakoniwa Core Functions (Minimum Semantics)](src/architecture/core-functions.md) (`src/architecture/core-functions.md`)
-- Repository mapping (Appendix): [Repository Mapping](src/architecture/repository-mapping.md) (`src/architecture/repository-mapping.md`)
-- Diagrams (Informative): [Diagram Index](src/architecture/diagrams.md) (`src/architecture/diagrams.md`)
-- `src/proofs/`
-  - Mathematical proofs and formal reasoning
-- `diagrams/`
-  - Architecture and concept diagrams (SVG as primary format)
-- `dist/`
-  - Generated artifacts (PDF / HTML)  
-    *(not committed; produced via build/CI)*
+- English (default)
+  - Positioning document: [Hakoniwa positioning](src/position.md) (`src/position.md`)
+  - Glossary: [Hakoniwa glossary](src/glossary.md) (`src/glossary.md`)
+  - Architecture overview (Normative): [Hakoniwa Architecture Overview](src/architecture/overview.md) (`src/architecture/overview.md`)
+  - Core functions (Normative): [Hakoniwa Core Functions (Minimum Semantics)](src/architecture/core-functions.md) (`src/architecture/core-functions.md`)
+  - Repository mapping (Appendix): [Repository Mapping](src/architecture/repository-mapping.md) (`src/architecture/repository-mapping.md`)
+  - Diagrams (Informative): [Diagram Index](src/architecture/diagrams.md) (`src/architecture/diagrams.md`)
+- Japanese (`-ja`)
+  - 位置付け: [箱庭の立ち位置](src/position-ja.md) (`src/position-ja.md`)
+  - 用語集: [用語集](src/glossary-ja.md) (`src/glossary-ja.md`)
+  - アーキテクチャ概要（Normative）: [箱庭アーキテクチャ全体像](src/architecture/overview-ja.md) (`src/architecture/overview-ja.md`)
+  - コア機能（Normative）: [箱庭のコア機能（最小意味論）](src/architecture/core-functions-ja.md) (`src/architecture/core-functions-ja.md`)
+  - リポジトリ対応表（Appendix）: [リポジトリ対応表](src/architecture/repository-mapping-ja.md) (`src/architecture/repository-mapping-ja.md`)
+  - 図版一覧（Informative）: [図版一覧](src/architecture/diagrams-ja.md) (`src/architecture/diagrams-ja.md`)
 
 ---
 
@@ -74,7 +75,9 @@ Typical outputs:
 - PDF (for distribution and review)
 - HTML (for web reading)
 
-Build instructions will be added once the document set stabilizes.
+Build scripts:
+- English PDF: `./scripts/build-pdf-en.sh`
+- Japanese PDF: `./scripts/build-pdf-ja.sh`
 
 ---
 

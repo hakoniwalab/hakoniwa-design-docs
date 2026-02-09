@@ -1,101 +1,95 @@
-# 箱庭のコア機能（最小意味論）
+# Hakoniwa Core Functions (Minimum Semantics)
 
 (Normative)
 
-本章は、箱庭が提供する最小意味論（breakdown を防ぐための最小限のセマンティクス）を、実装に依存せず定義する。ここでの定義はすべて規範であり、最適化・ポリシー・運用判断は範囲外とする。
+This chapter defines the minimum semantics provided by Hakoniwa (the minimum semantics required to prevent breakdown), independent of implementation. All definitions here are normative. Optimization, policies, and operational decisions are out of scope.
 
-## 1. 分散実行モデル（Parallel-First）
-**保証すること**
-- 複数アセットが並列に実行されることを前提とする。
-- 並列実行下でも実行責任と因果境界が意味論的に確定される。
+## 1. Distributed Execution Model (Parallel-First)
+**What Hakoniwa Guarantees**
+- Multiple assets are assumed to run in parallel.
+- Execution responsibility and causal boundaries are semantically fixed even under parallel execution.
 
-**決めないこと**
-- 実行配置の最適化
-- 並列度やスケジューリング戦略
+**What Hakoniwa Does Not Decide**
+- Optimization of execution placement
+- Degree of parallelism and scheduling strategy
 
-**Invariant:** 並列実行下でも責任と因果境界は意味論的に確定される（実行効率や最適性を保証するものではない）。
+**Invariant:** Responsibility and causal boundaries are semantically fixed even under parallel execution (this does not imply optimality or efficiency).
 
-## 2. 有界ドリフト（Bounded Drift）
-**保証すること**
-- 設計時に定義された上限（d_max）内で、論理時間のドリフトが常に有界である。
-- 1ノード構成では d_max、分散構成では 2·d_max の範囲に収まる。
+## 2. Bounded Drift
+**What Hakoniwa Guarantees**
+- Logical-time drift is always bounded within the design-time limit (d_max).
+- In a single-node configuration, the bound is d_max; in distributed configurations, it is 2·d_max.
 
-**決めないこと**
-- d_max 超過時の自動補正
-- 物理時間と論理時間の厳密一致
+**What Hakoniwa Does Not Decide**
+- Automatic correction when d_max is exceeded
+- Exact alignment of physical time and logical time
 
-**Invariant:** 論理時間のドリフトは設計上限（d_max / 2·d_max）を超えない（物理時間の一致や遅延の消滅を意味しない）。
+**Invariant:** Logical-time drift does not exceed the design bounds (d_max / 2·d_max); it does not imply physical-time synchronization or zero delay.
 
-## 3. Owner の一意性
-**保証すること**
-- すべてのEUに対し Owner は常に一意である。
-- PDU書き込み責任は曖昧化しない。
+## 3. Owner Uniqueness
+**What Hakoniwa Guarantees**
+- The Owner of every EU is always unique.
+- Responsibility for PDU writing is never ambiguous.
 
-**決めないこと**
-- Owner 交代の最適化戦略
-- Owner の性能評価基準
+**What Hakoniwa Does Not Decide**
+- Optimization strategy for Owner transitions
+- Performance evaluation criteria for Owner
 
-**Invariant:** いかなる時点でもEUのOwnerは一意である（Ownerの交代自体を禁止するものではない）。
+**Invariant:** The Owner of an EU is unique at any point in time (this does not forbid Owner transitions).
 
-## 4. Epoch（世代識別）
-**保証すること**
-- 実行責任の世代は Epoch によって一意に識別される。
-- Epoch の一致は意味論上の一致として扱われる（等価性ベース）。
+## 4. Epoch (Generation Identification)
+**What Hakoniwa Guarantees**
+- The generation of execution responsibility is uniquely identified by Epoch.
+- Equality of Epoch is treated as semantic equality (equality-based).
 
-**決めないこと**
-- Epoch 切替のタイミング最適化
-- 具体的な世代番号の採番方式
+**What Hakoniwa Does Not Decide**
+- Optimization of Epoch switch timing
+- Specific numbering scheme for generations
 
-**Invariant:** Epoch の一致は意味論的な同一性を意味する（物理実行の同時性を意味しない）。
+**Invariant:** Equality of Epoch implies semantic identity (it does not imply simultaneous physical execution).
 
-## 5. Commit Point（意味論的確定点）
-**保証すること**
-- Commit Point において因果境界と責任が意味論的に確定される。
-- Commit Point と物理的実行開始の不一致は許容される。
+## 5. Commit Point (Semantic Fixation)
+**What Hakoniwa Guarantees**
+- Causal boundaries and responsibility are semantically fixed at Commit Points.
+- A gap between Commit Point and physical execution start is allowed.
 
-**決めないこと**
-- Commit Point の発火ポリシー
-- 物理開始を同期させる強制手段
+**What Hakoniwa Does Not Decide**
+- Policies for triggering Commit Points
+- Forced synchronization of physical start
 
-**Invariant:** Commit Point は責任と因果境界の意味論的確定点である（物理的開始の同期点ではない）。
+**Invariant:** Commit Point is the semantic fixation point for responsibility and causal boundaries (not a physical start synchronization point).
 
-## 6. 責務分離（Conductor / Bridge / Hakoniwa Asset）
-**保証すること**
-- Conductor は実行責任遷移のみを管理し、数値解法や最適化は扱わない。
-- Bridge は Data Plane と Control Plane の境界整合を担保する。
-- Hakoniwa Asset は並列実行主体として Data Plane 上で動作する。
+## 6. Responsibility Separation (Conductor / Bridge / Hakoniwa Asset)
+**What Hakoniwa Guarantees**
+- Conductor manages only execution responsibility transitions and does not handle numerical solvers or optimization.
+- Bridge ensures boundary consistency between Data Plane and Control Plane.
+- Hakoniwa Asset operates as a parallel execution entity on the Data Plane.
 
-補足：
-> Conductor はシステムを制御する存在ではない。
-> Conductor の役割は、分散実行において
-> 「どの実行結果が、誰の責任として確定したのか」
-> を一意に裁定することである。
+**What Hakoniwa Does Not Decide**
+- Internal algorithms of Conductor
+- Communication methods for Bridge
+- Implementation language or environment for Hakoniwa Asset
 
-**決めないこと**
-- Conductor の内部アルゴリズム
-- Bridge の通信手法
-- Hakoniwa Asset の実装言語・環境
+**Invariant:** Responsibilities are separated across Conductor, Bridge, and Hakoniwa Asset without overlap (this does not preclude a single-process implementation).
 
-**Invariant:** 責務は Conductor / Bridge / Hakoniwa Asset に分離され、混在しない（単一プロセス実装を否定するものではない）。
+## 7. Declarative Design (Schema + Generator + Validation)
+**What Hakoniwa Guarantees**
+- Execution configurations are described declaratively.
+- Design consistency is validated.
 
-## 7. 宣言的設計（Schema + Generator + Validation）
-**保証すること**
-- 実行構成は宣言的に記述される。
-- 設計の整合性は検証される。
+**What Hakoniwa Does Not Decide**
+- Specific generation methods
+- Implementation form of validation tools
 
-**決めないこと**
-- 具体的な生成方式
-- 検証ツールの実装形態
+**Invariant:** Execution configuration is declarative and its consistency is validated (the generation toolchain is not constrained).
 
-**Invariant:** 実行構成は宣言的に記述され、整合性が検証される（生成方式やツール選定を拘束しない）。
+## 8. Endpoint (Causality Boundary and Delivery/Lifetime Semantics)
+**What Hakoniwa Guarantees**
+- Endpoint is not a generic messaging API.
+- Endpoint defines causality boundaries and delivery/lifetime semantics.
 
-## 8. Endpoint（因果境界と配信・寿命セマンティクス）
-**保証すること**
-- Endpoint は単なるメッセージAPIではない。
-- Endpoint は因果境界と配信・寿命セマンティクスを定義する。
+**What Hakoniwa Does Not Decide**
+- Message format or optimization methods
+- Numerical correction for delivery delays
 
-**決めないこと**
-- メッセージ形式や最適化手法
-- 配信遅延への数値的な補正
-
-**Invariant:** Endpoint は因果境界と配信・寿命セマンティクスを規定する（汎用メッセージAPIであることを意味しない）。
+**Invariant:** Endpoint specifies causality boundaries and delivery/lifetime semantics (it is not a generic messaging API).

@@ -1,15 +1,15 @@
-# 図版一覧
+# Diagram Index
 
 (Informative)
 
-本章は、今後維持する図版の一覧とプレースホルダを示す。
+This chapter lists the diagrams to be maintained and provides placeholders.
 
-## 予定する図版
-- スタック（層）図
-- Data Plane / Control Plane フロー図
-- ランタイムトポロジ図
+## Planned Diagrams
+- Stack (layered) diagram
+- Data Plane / Control Plane flow diagram
+- Runtime topology diagram
 
-## スタック（層）図（プレースホルダ）
+## Stack (Layered) Diagram (Placeholder)
 ```mermaid
 flowchart TB
   L0[Hardware / OS]
@@ -21,9 +21,9 @@ flowchart TB
   L0 --> L1 --> L2 --> L3 --> L4
 ```
 
-キャプション: 概念構造を示すスタック図であり、配置や実行環境の具体を表すものではない。Registry は構成情報の保持ロールであり、意味論の権威ではない。
+Caption: A conceptual stack view showing major layers and responsibility boundaries. It is not a deployment diagram. Registry is an informative/configuration role, not a semantic authority.
 
-## Data Plane / Control Plane フロー図（プレースホルダ）
+## Data Plane / Control Plane Flow Diagram (Placeholder)
 ```mermaid
 flowchart LR
   subgraph DataPlane[Data Plane]
@@ -43,4 +43,4 @@ flowchart LR
   BRG <--> COND
 ```
 
-キャプション: 概念的な平面分離と境界横断を示す図であり、配置やネットワーク構成の具体を表すものではない。Registry は構成情報の保持ロールであり、意味論の権威ではない。
+Caption: This diagram shows conceptual plane separation and boundary crossing. It is not a network or runtime deployment diagram. Registry is an informative/configuration role, not a semantic authority.

@@ -1,68 +1,53 @@
-# 箱庭アーキテクチャ全体像
+# Hakoniwa Architecture Overview
 
 (Normative)
 
-## 目的とスコープ
-本章は、箱庭のアーキテクチャを「責務」と「境界」に基づいて定義する。ここで定義される内容は、実装リポジトリに依存しない設計上の規範である。実装の構成や名称は付録に分離し、本章では扱わない。
+## Purpose and Scope
+This chapter defines the Hakoniwa architecture based on responsibilities and boundaries. The content here is a design norm independent of implementation repositories. Implementation composition and naming are separated into an appendix and are not covered in this chapter.
 
-## データプレーンとコントロールプレーン
-箱庭は、Data Plane と Control Plane を明確に分離する。
+## Data Plane and Control Plane
+Hakoniwa clearly separates the Data Plane and the Control Plane.
 
-- Data Plane: シミュレーション実行に必要な実データ（PDU等）の伝達・更新・時間進行を担う領域。
-- Control Plane: 実行責任の移譲・世代管理・因果境界の確定・ポリシー適用を担う領域。
+- Data Plane: The domain responsible for transmitting, updating, and advancing time for execution data required for simulation (e.g., PDUs).
+- Control Plane: The domain responsible for transferring execution responsibility, managing generations, fixing causal boundaries, and applying policies.
 
-この分離は、性能重視の分散実行と、責任・因果の意味論を両立させるための根本原理である。
+This separation is a foundational principle to balance performance-first distributed execution with responsibility and causality semantics.
 
-ここで、本書で用いる「意味論的」という言葉は、抽象理論を指すものではない。
-箱庭における意味論とは、
-「分散実行において、責任と因果を後から解釈に委ねないための設計上の固定ルール」
-を指す。
-
-
-### Data Plane / Control Plane 比較
+### Data Plane / Control Plane Comparison
 
 | Plane | Responsibility | Primary concern | Typical components | What is guaranteed |
 | --- | --- | --- | --- | --- |
-| Data Plane | 実データの伝達・更新・時間進行 | 実行性能と並列性 | Hakoniwa Asset, EU, Endpoint | データ伝達の因果境界と配信・寿命セマンティクスの明示 |
-| Control Plane | 実行責任の遷移・世代管理・因果境界の確定 | 責任の一意性と意味論の確定 | Conductor, Registry, Remote API | Commit Point による責任と因果境界の意味論的確定 |
+| Data Plane | Transmission, update, and time progression of execution data | Execution performance and parallelism | Hakoniwa Asset, EU, Endpoint | Causality boundaries and delivery/lifetime semantics are explicitly defined |
+| Control Plane | Responsibility transitions, generation management, causal boundary fixation | Uniqueness of responsibility and semantic fixation | Conductor, Registry, Remote API | Semantic fixation of responsibility and causal boundaries at Commit Points |
 
-ここでいう Data Plane / Control Plane は、
-一般的な分散システムや Kubernetes における用語とは意味が異なる。
+## Component Design Roles (Responsibilities)
+The following are design roles, not repository names.
 
-箱庭における Control Plane は、
-リソース管理やサービス制御ではなく、
-「実行責任と因果境界を確定するための論理的役割」
-を指す。
+- **Hakoniwa Asset**: A unit executed as an OS process. It holds EU (Execution Unit) instances and runs in parallel on the Data Plane.
+- **Execution Unit (EU)**: A logical execution entity. It can have instances across multiple assets. Ownership (Owner) is always unique.
+- **Endpoint**: A boundary for data transfer. It is not a generic messaging API; it defines **causality boundaries** and **delivery/lifetime semantics**.
+- **Bridge**: A boundary-crossing role between the Data Plane and Control Plane. It maintains consistency across both planes and ensures cross-boundary connectivity.
+- **Conductor**: The core of the Control Plane. It manages execution responsibility transitions for EUs and fixes Epoch and Commit Point. It does not decide numerical solvers or optimization.
+- **Registry**: A role that holds system-wide configuration and definition information. It does not hold responsibility or causality semantics.
+- **Remote API**: The API surface for control operations and external integration. Control Plane operations are performed through it.
 
+## Architectural Guarantees and Non-Guarantees
+### Guaranteed (Architecture Level)
+- Data Plane and Control Plane are separated by responsibility.
+- Execution responsibility (Owner) is always unique.
+- Causal boundaries are semantically fixed at Commit Points.
+- Endpoint defines causality boundaries and delivery/lifetime semantics.
 
-## コンポーネントの設計ロール（責務）
-以下は設計上のロールであり、リポジトリ名ではない。
+### Out of Scope (Architecture Level)
+- Selection of numerical solvers and optimization policies
+- Optimization of execution placement and load balancing
+- Numerical handling of delayed data (interpolation, extrapolation, etc.)
+- Choice of implementation languages or frameworks
 
-- **Hakoniwa Asset**: OSプロセスとして実行される単位。EU（Execution Unit）の実体を保持し、Data Plane 上で並列に実行する。
-- **Execution Unit (EU)**: 論理的な実行主体。複数アセットに実体を持ちうる。EUの所有権（Owner）は常に一意である。
-- **Endpoint**: データ伝達の境界。単なるメッセージAPIではなく、**因果境界**および**配信・寿命セマンティクス**を定義する。
-- **Bridge**: Data Plane と Control Plane の境界を跨ぐロール。両平面の整合性を維持し、境界横断の接続性を担保する。
-- **Conductor**: Control Plane の中核。EUの実行責任の遷移を管理し、Epoch と Commit Point を確定する。数値解法の決定や最適化は行わない。
-- **Registry**: システム全体の構成・定義情報を保持するロール。責任や因果の意味論は保持しない。
-- **Remote API**: 制御操作や外部統合のためのAPI面。Control Plane への操作はここを通じて行われる。
+## Link to Core Semantics
+The architectural guarantees in this chapter are realized based on the minimum semantics defined in `architecture/core-functions.md` (Owner uniqueness, Epoch, Commit Point, Data Plane/Control Plane separation, and Endpoint causality boundaries). The architecture assigns these semantics to concrete responsibilities and boundaries.
 
-## アーキテクチャ上の保証と非保証
-### 保証されること（アーキテクチャレベル）
-- Data Plane と Control Plane は責務として分離される。
-- 実行責任（Owner）は常に一意である。
-- Commit Point において因果境界が意味論的に確定される。
-- Endpoint は因果境界と配信・寿命セマンティクスを定義する。
-
-### 取り扱わないこと（アーキテクチャレベル）
-- 数値解法の選定や最適化方針
-- 実行配置や負荷分散の最適化
-- 遅延データの数値処理（補間・外挿等）
-- 実装の言語・フレームワーク選択
-
-## コア意味論との接続
-本章で規定するアーキテクチャ上の保証は、`architecture/core-functions.md` に定義された最小意味論（Owner の一意性、Epoch、Commit Point、Data Plane/Control Plane の分離、Endpoint の因果境界）に基づいて実現される。アーキテクチャは、これらの意味論を構成要素に割り当て、責務と境界として固定する。
-
-## 概念図（簡易）
+## Concept Diagram (Simplified)
 ```mermaid
 flowchart LR
   subgraph DataPlane[Data Plane]
