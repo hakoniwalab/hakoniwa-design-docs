@@ -93,3 +93,5 @@ This chapter defines the minimum semantics provided by Hakoniwa (the minimum sem
 - Numerical correction for delivery delays
 
 **Invariant:** Endpoint specifies causality boundaries and delivery/lifetime semantics (it is not a generic messaging API).
+
+**Clarification:** A causality boundary fixes which data/events belong to which Owner/Epoch, preventing post-hoc reinterpretation even under bounded drift or physical start delays.

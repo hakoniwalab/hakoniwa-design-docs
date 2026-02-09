@@ -9,6 +9,8 @@ and simulation platform.
 The documents in this repository are written as **primary design artifacts** and
 can be built into human-readable whitepapers (PDF / HTML).
 
+**Normative（設計上の規範）** in this repository means implementation-independent rules that must be satisfied for a system to be considered “Hakoniwa.” **Informative（参考情報）** content provides context and examples but is not binding.
+
 ---
 
 ## Purpose

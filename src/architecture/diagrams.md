@@ -7,6 +7,7 @@ This chapter lists the diagrams to be maintained and provides placeholders.
 ## Planned Diagrams
 - Stack (layered) diagram
 - Data Plane / Control Plane flow diagram
+- Epoch / Owner transition (conceptual sequence) diagram
 - Runtime topology diagram
 
 ## Stack (Layered) Diagram (Placeholder)
@@ -44,3 +45,27 @@ flowchart LR
 ```
 
 Caption: This diagram shows conceptual plane separation and boundary crossing. It is not a network or runtime deployment diagram. Registry is an informative/configuration role, not a semantic authority.
+
+## Epoch / Owner Transition Diagram (Placeholder)
+```mermaid
+sequenceDiagram
+  participant A as Asset A (Owner: Epoch N)
+  participant B as Asset B (Owner: Epoch N+1)
+  participant BRG as Bridge / Endpoint
+  participant COND as Conductor
+
+  Note over A,BRG: Data Plane execution under Epoch N
+  A ->> BRG: Emit PDU (Epoch N)
+  BRG -->> A: Deliver within Epoch N
+
+  Note over COND: Control Plane fixes transition
+  COND ->> BRG: Commit Point for Epoch N
+  COND ->> B: Assign Owner for Epoch N+1
+  BRG -->> B: Enable delivery for Epoch N+1
+
+  Note over B,BRG: Data Plane execution under Epoch N+1
+  B ->> BRG: Emit PDU (Epoch N+1)
+  BRG -->> B: Deliver within Epoch N+1
+```
+
+Caption: A conceptual sequence showing how Conductor fixes a Commit Point and assigns a new Owner for a new Epoch. It is illustrative only and not a deployment or message-protocol specification.
