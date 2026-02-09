@@ -21,6 +21,8 @@ flowchart TB
   L0 --> L1 --> L2 --> L3 --> L4
 ```
 
+Caption: A stack view showing Hakoniwa’s major conceptual layers and responsibility boundaries.
+
 ## Data Plane / Control Plane Flow Diagram (Placeholder)
 ```mermaid
 flowchart LR
@@ -40,3 +42,5 @@ flowchart LR
   EP <--> BRG[Bridge]
   BRG <--> COND
 ```
+
+Caption: Bridge connects across the boundary between Data Plane and Control Plane.

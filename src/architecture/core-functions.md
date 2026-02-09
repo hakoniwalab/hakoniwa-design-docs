@@ -13,6 +13,8 @@ This chapter defines the minimum semantics provided by Hakoniwa (the minimum sem
 - Optimization of execution placement
 - Degree of parallelism and scheduling strategy
 
+**Invariant:** Responsibility and causal boundaries are semantically fixed even under parallel execution.
+
 ## 2. Bounded Drift
 **What Hakoniwa Guarantees**
 - Logical-time drift is always bounded within the design-time limit (d_max).
@@ -21,6 +23,8 @@ This chapter defines the minimum semantics provided by Hakoniwa (the minimum sem
 **What Hakoniwa Does Not Decide**
 - Automatic correction when d_max is exceeded
 - Exact alignment of physical time and logical time
+
+**Invariant:** Logical-time drift does not exceed the design bounds (d_max / 2·d_max).
 
 ## 3. Owner Uniqueness
 **What Hakoniwa Guarantees**
@@ -31,6 +35,8 @@ This chapter defines the minimum semantics provided by Hakoniwa (the minimum sem
 - Optimization strategy for Owner transitions
 - Performance evaluation criteria for Owner
 
+**Invariant:** The Owner of an EU is unique at any point in time.
+
 ## 4. Epoch (Generation Identification)
 **What Hakoniwa Guarantees**
 - The generation of execution responsibility is uniquely identified by Epoch.
@@ -40,6 +46,8 @@ This chapter defines the minimum semantics provided by Hakoniwa (the minimum sem
 - Optimization of Epoch switch timing
 - Specific numbering scheme for generations
 
+**Invariant:** Equality of Epoch implies semantic identity.
+
 ## 5. Commit Point (Semantic Fixation)
 **What Hakoniwa Guarantees**
 - Causal boundaries and responsibility are semantically fixed at Commit Points.
@@ -48,6 +56,8 @@ This chapter defines the minimum semantics provided by Hakoniwa (the minimum sem
 **What Hakoniwa Does Not Decide**
 - Policies for triggering Commit Points
 - Forced synchronization of physical start
+
+**Invariant:** Commit Point is the semantic fixation point for responsibility and causal boundaries.
 
 ## 6. Responsibility Separation (Conductor / Bridge / Hakoniwa Asset)
 **What Hakoniwa Guarantees**
@@ -60,6 +70,8 @@ This chapter defines the minimum semantics provided by Hakoniwa (the minimum sem
 - Communication methods for Bridge
 - Implementation language or environment for Hakoniwa Asset
 
+**Invariant:** Responsibilities are separated across Conductor, Bridge, and Hakoniwa Asset without overlap.
+
 ## 7. Declarative Design (Schema + Generator + Validation)
 **What Hakoniwa Guarantees**
 - Execution configurations are described declaratively.
@@ -69,6 +81,8 @@ This chapter defines the minimum semantics provided by Hakoniwa (the minimum sem
 - Specific generation methods
 - Implementation form of validation tools
 
+**Invariant:** Execution configuration is declarative and its consistency is validated.
+
 ## 8. Endpoint (Causality Boundary and Delivery/Lifetime Semantics)
 **What Hakoniwa Guarantees**
 - Endpoint is not a generic messaging API.
@@ -77,3 +91,5 @@ This chapter defines the minimum semantics provided by Hakoniwa (the minimum sem
 **What Hakoniwa Does Not Decide**
 - Message format or optimization methods
 - Numerical correction for delivery delays
+
+**Invariant:** Endpoint specifies causality boundaries and delivery/lifetime semantics.
