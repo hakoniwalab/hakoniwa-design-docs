@@ -65,6 +65,12 @@
 - Bridge は Data Plane と Control Plane の境界整合を担保する。
 - Hakoniwa Asset は並列実行主体として Data Plane 上で動作する。
 
+補足：
+> Conductor はシステムを制御する存在ではない。
+> Conductor の役割は、分散実行において
+> 「どの実行結果が、誰の責任として確定したのか」
+> を一意に裁定することである。
+
 **決めないこと**
 - Conductor の内部アルゴリズム
 - Bridge の通信手法

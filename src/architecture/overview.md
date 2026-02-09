@@ -13,12 +13,27 @@
 
 この分離は、性能重視の分散実行と、責任・因果の意味論を両立させるための根本原理である。
 
+ここで、本書で用いる「意味論的」という言葉は、抽象理論を指すものではない。
+箱庭における意味論とは、
+「分散実行において、責任と因果を後から解釈に委ねないための設計上の固定ルール」
+を指す。
+
+
 ### Data Plane / Control Plane 比較
 
 | Plane | Responsibility | Primary concern | Typical components | What is guaranteed |
 | --- | --- | --- | --- | --- |
 | Data Plane | 実データの伝達・更新・時間進行 | 実行性能と並列性 | Hakoniwa Asset, EU, Endpoint | データ伝達の因果境界と配信・寿命セマンティクスの明示 |
 | Control Plane | 実行責任の遷移・世代管理・因果境界の確定 | 責任の一意性と意味論の確定 | Conductor, Registry, Remote API | Commit Point による責任と因果境界の意味論的確定 |
+
+ここでいう Data Plane / Control Plane は、
+一般的な分散システムや Kubernetes における用語とは意味が異なる。
+
+箱庭における Control Plane は、
+リソース管理やサービス制御ではなく、
+「実行責任と因果境界を確定するための論理的役割」
+を指す。
+
 
 ## コンポーネントの設計ロール（責務）
 以下は設計上のロールであり、リポジトリ名ではない。
