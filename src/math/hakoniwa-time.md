@@ -278,7 +278,7 @@ $$
 - $0 < \Delta T_c \leq D_{max}$
   - **理由**: コアが最初のステップ（ $T_c=0, T_i=0$ ）で進行するために必要。もしコアの1回のジャンプ量 $\Delta T_c$ が、許容される最大遅延幅 $D_{max}$ より大きい場合、コアは時刻0から動けず、システムは開始と同時にデッドロックする。
 
-- $0 < \Delta T_i \leq D_{max} (\forall i)$
+- $0 < \Delta T_i \leq D_{max} \quad (\forall i)$
   - **理由**: あるアセット $i$ が、コアから許される最大限まで遅れた状態 ( $T_i = T_c - D_{max}$ ) になった際の復帰に必要。このとき、コアはアセット $i$ を待つため進行を停止する。システムの回復はアセット $i$ の進行にかかっているが、もし $D_{max} < \Delta T_i$ であった場合、アセットが進行しようとすると、 $T_i + \Delta T_i = (T_c - D_{max}) + \Delta T_i = T_c + (\Delta T_i - D_{max}) > T_c$ となり、コア時刻を超えるため進行できない。結果、両者とも永久に動けずデッドロックとなる。厳密には、このデッドロックは $T_i = T_c - D_{max}$ の一点でなくとも、アセットが以下のゾーンに入った場合に発生する。 
 $T_c - \Delta T_i < T_i \leq T_c - D_{max}$
 （このゾーンは $D_{max} < \Delta T_i$ の場合に存在する）
@@ -339,13 +339,13 @@ $$
 
 ### 4. 進行性条件のまとめ
 
-| | 一般進行性条件<br>($\Delta T_c + \max_{i}(\Delta T_i) \leq D_{max}$) | 割り切れる条件<br>($\Delta T_c \pmod{\Delta T_i} = 0$) | 結果 |
+| | 一般進行性条件<br>($\Delta T_c + \max_{i}(\Delta T_i) \leq D_{max}$) | 割り切れる条件<br>($\Delta T_c \mod{\Delta T_i} = 0$) | 結果 |
 | :--- | :--- | :--- | :--- |
 | **最も安全** | **満たす** | （不問） | **進行性を保証** |
 | **特別ケース** | 満たさない | **満たす** | **進行性を保証** |
 | **不安定** | 満たさない | 満たさない | 進行する場合も、デッドロックする場合もある |
 
-実験結果の詳細は [liveness-experiment.md](liveness-experiment.md) を参照。
+実験結果の詳細は [liveness-experiment](experiment/liveness-experiment.md) を参照。
 ![deadlock](deadlock.png)
 
 # 多段拡張
