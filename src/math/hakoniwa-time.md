@@ -333,7 +333,6 @@ $
 
 （※証明と実験の詳細は [liveness-experiment](experiment/liveness-experiment.md) を参照）
 
-![deadlock](deadlock.png)
 ### 3. 不安定な構成
 
 「基本要件」は満たすが、「一般進行性条件」と「割り切れる条件」のどちらも満たさない構成。この場合、進行性（liveness）は保証されない。シミュレーションは完走するかもしれないし、デッドロックするかもしれない。その結果は、各コンポーネントの更新タイミング（$\Delta t_c, \Delta t_i$）という偶然の要素に左右される。
@@ -347,6 +346,7 @@ $
 | **不安定** | 満たさない | 満たさない | 進行する場合も、デッドロックする場合もある |
 
 実験結果の詳細は [liveness-experiment.md](liveness-experiment.md) を参照。
+![deadlock](deadlock.png)
 
 # 多段拡張
 
