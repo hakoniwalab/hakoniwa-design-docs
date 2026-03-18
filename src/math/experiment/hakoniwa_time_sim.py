@@ -60,16 +60,27 @@ class Driver:
         all_delta_t = [self.core.delta_t] + [a.delta_t for a in self.assets]
         deadlock_threshold = 2 * max(all_delta_t) if all_delta_t else 1
 
+        # Each side uses the counterpart value observed at its own previous count_up.
+        asset_known_core_time = {a.id: self.core.T for a in self.assets}
+        core_known_asset_times = {a.id: a.T for a in self.assets}
+
         for t in range(self.wall_time_duration):
             total_T_before = self.core.T + sum(a.T for a in self.assets)
             
             for asset in self.assets:
                 if t > 0 and t % asset.delta_t == 0:
-                    asset.count_up(self.core.T)
+                    # Use the core time observed at the asset's previous count_up.
+                    asset.count_up(asset_known_core_time[asset.id])
+                    # Observe core time at this count_up for the next asset count_up.
+                    asset_known_core_time[asset.id] = self.core.T
 
             if t > 0 and t % self.core.delta_t == 0:
-                asset_times = [asset.T for asset in self.assets]
+                # Use asset times observed at the core's previous count_up.
+                asset_times = [core_known_asset_times[asset.id] for asset in self.assets]
                 self.core.count_up(asset_times)
+                # Observe asset times at this count_up for the next core count_up.
+                for asset in self.assets:
+                    core_known_asset_times[asset.id] = asset.T
 
             total_T_after = self.core.T + sum(a.T for a in self.assets)
             if total_T_after <= total_T_before and t > 0:
@@ -83,11 +94,12 @@ class Driver:
                 return "deadlocked"
         return "completed"
 
+Wall_time_duration = 2000  # Total wall time for the simulation (t=0 to t=2000)
 def run_simulation(params):
     """Sets up and runs a single simulation, returning the history and result."""
     core = Core(delta_t=params['core_delta_t'], delta_T=params['core_delta_T'], d_max=params['d_max'])
     assets = [Asset(asset_id=i+1, delta_t=params['asset_delta_t_list'][i], delta_T=params['asset_delta_Ts'][i]) for i in range(len(params['asset_delta_Ts']))]
-    driver = Driver(core=core, assets=assets, wall_time_duration=201)
+    driver = Driver(core=core, assets=assets, wall_time_duration=Wall_time_duration)
     result = driver.run()
     final_Tc = driver.history[-1]['T_c'] if driver.history else 0
     print(f"  - Result: {result.upper()}, Final T_c: {final_Tc}")
@@ -97,6 +109,7 @@ def plot_overlay(title, filename, settings_data):
     """Plots an overlay of multiple simulation histories."""
     fig, ax = plt.subplots(1, 1, figsize=(12, 8))
     colors = ['blue', 'red', 'green']
+    deadlock_marker_added = False
     
     param_texts = []
     for i, (setting_name, data) in enumerate(settings_data.items()):
@@ -111,6 +124,24 @@ def plot_overlay(title, filename, settings_data):
         # Plot Core line
         core_label = f'{setting_name} Core ({result.upper()})'
         ax.plot(t, T_c, label=core_label, color=color, linewidth=2, drawstyle='steps-post')
+
+        # Mark deadlock occurrence on the core trajectory.
+        if result == "deadlocked" and history:
+            deadlock_label = "Deadlock Point" if not deadlock_marker_added else None
+            ax.scatter(
+                [t[-1]], [T_c[-1]],
+                color='black', marker='x', s=100, linewidths=2,
+                label=deadlock_label, zorder=10
+            )
+            ax.annotate(
+                f"{setting_name} DEADLOCK",
+                xy=(t[-1], T_c[-1]),
+                xytext=(8, 8),
+                textcoords='offset points',
+                fontsize=8,
+                color='black'
+            )
+            deadlock_marker_added = True
         
         # Plot Asset lines
         # Collect all asset IDs for this setting
@@ -136,8 +167,8 @@ def plot_overlay(title, filename, settings_data):
     ax.set_title(title, fontsize=14)
     ax.legend(loc='upper left', fontsize=8) # Reduced font size for legend
     ax.grid(True)
-    ax.set_xlim(0, 200)
-    ax.set_ylim(0, 2000)
+    ax.set_xlim(0, Wall_time_duration+1)
+    ax.set_ylim(0, Wall_time_duration*5)
     
     full_param_text = "\n".join(param_texts)
     ax.text(0.98, 0.98, full_param_text, transform=ax.transAxes, fontsize=10,
@@ -153,37 +184,37 @@ def plot_overlay(title, filename, settings_data):
 if __name__ == '__main__':
     safest_settings = {
         "Setting 1.1": {
-            "d_max": 200, "core_delta_T": 100, "asset_delta_Ts": [80, 70], "core_delta_t": 10, "asset_delta_t_list": [15, 16]
+            "d_max": 200, "core_delta_T": 100, "asset_delta_Ts": [80, 70], "core_delta_t": 20, "asset_delta_t_list": [15, 16]
         },
         "Setting 1.2": {
-            "d_max": 150, "core_delta_T": 80, "asset_delta_Ts": [50, 40], "core_delta_t": 10, "asset_delta_t_list": [15, 16]
+            "d_max": 150, "core_delta_T": 80, "asset_delta_Ts": [50, 40], "core_delta_t": 20, "asset_delta_t_list": [15, 16]
         },
         "Setting 1.3": {
-            "d_max": 300, "core_delta_T": 150, "asset_delta_Ts": [100, 120], "core_delta_t": 10, "asset_delta_t_list": [15, 16]
+            "d_max": 300, "core_delta_T": 150, "asset_delta_Ts": [100, 120], "core_delta_t": 20, "asset_delta_t_list": [15, 16]
         }
     }
 
     unstable_settings = {
         "Setting 2.1": {
-            "d_max": 170, "core_delta_T": 120, "asset_delta_Ts": [60, 41], "core_delta_t": 10, "asset_delta_t_list": [15, 16]
+            "d_max": 170, "core_delta_T": 90, "asset_delta_Ts": [50, 83], "core_delta_t": 20, "asset_delta_t_list": [15, 16]
         },
         "Setting 2.2": {
-            "d_max": 185, "core_delta_T": 100, "asset_delta_Ts": [90, 85], "core_delta_t": 10, "asset_delta_t_list": [15, 16]
+            "d_max": 185, "core_delta_T": 95, "asset_delta_Ts": [50, 97], "core_delta_t": 20, "asset_delta_t_list": [15, 16]
         },
         "Setting 2.3": {
-            "d_max": 120, "core_delta_T": 120, "asset_delta_Ts": [60, 41], "core_delta_t": 10, "asset_delta_t_list": [15, 16]
+            "d_max": 120, "core_delta_T": 70, "asset_delta_Ts": [55, 37], "core_delta_t": 20, "asset_delta_t_list": [15, 16]
         }
     }
 
     divisibility_settings = {
         "Setting 3.1": {
-            "d_max": 170, "core_delta_T": 120, "asset_delta_Ts": [60, 40], "core_delta_t": 10, "asset_delta_t_list": [15, 16]
+            "d_max": 170, "core_delta_T": 120, "asset_delta_Ts": [60, 40], "core_delta_t": 20, "asset_delta_t_list": [15, 16]
         },
         "Setting 3.2": {
-            "d_max": 140, "core_delta_T": 100, "asset_delta_Ts": [50, 25], "core_delta_t": 10, "asset_delta_t_list": [15, 16]
+            "d_max": 140, "core_delta_T": 100, "asset_delta_Ts": [50, 25], "core_delta_t": 20, "asset_delta_t_list": [15, 16]
         },
         "Setting 3.3": {
-            "d_max": 200, "core_delta_T": 150, "asset_delta_Ts": [75, 50], "core_delta_t": 10, "asset_delta_t_list": [15, 16]
+            "d_max": 200, "core_delta_T": 150, "asset_delta_Ts": [75, 50], "core_delta_t": 20, "asset_delta_t_list": [15, 16]
         }
     }
 

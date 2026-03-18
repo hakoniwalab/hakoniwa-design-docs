@@ -19,7 +19,7 @@ def run_single_experiment(params):
     assets = [Asset(asset_id=i+1, delta_t=params['asset_delta_t_list'][i], delta_T=asset_delta_Ts[i]) for i in range(len(asset_delta_Ts))]
     
     # The wall_time_duration is kept consistent for all runs to ensure comparability
-    driver = Driver(core=core, assets=assets, wall_time_duration=1001)
+    driver = Driver(core=core, assets=assets, wall_time_duration=2000)
     
     result = driver.run()
     
