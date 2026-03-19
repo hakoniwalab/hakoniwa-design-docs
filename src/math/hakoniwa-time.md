@@ -442,38 +442,52 @@ $$
 
 ## 理想モデルの保証範囲
 
-ここまでの安全性・進行性の議論は、通信遅延・観測遅延・同時刻内の順序差がない理想モデル（強い仮定）を対象としている。特に、通信やOSのコンテキストスイッチによって遅延が生じたときでも、安全性は保てるが、進行性は条件が厳しくなり、遅延を $D_{max}$ の幅に収めるための $T_c, T_i$ の許容幅は小さくなる。したがって、これらの証明で得られた条件（特に進行性の十分条件）は、実装にそのまま適用する際に差分評価が必要となる。
+ここまでの安全性・進行性の議論は、通信遅延・観測遅延・同時刻内の順序差がない理想モデル（強い仮定）を対象としている。特に、通信やOSのコンテキストスイッチによって遅延が生じたときでも、安全性は保てるが、進行性は条件が厳しくなり、遅延を $D_{max}$ の幅に収めるための $\Delta T_c, \Delta T_i$ の許容幅は小さくなる。したがって、これらの証明で得られた条件（特に進行性の十分条件）は、実装にそのまま適用する際に差分評価が必要となる。
 
 ## 遅延観測を含む一般化モデル（現実モデル）
 
-実装では、各コンポーネントがカウントアップ時に参照できる相手時刻は観測値であり、相手の最新実時刻と一致しない場合がある。ここでは、通信遅延と実行順序差を含むモデルとして定式化する。
+実装では、各コンポーネントがカウントアップ時に参照できる相手時刻は観測値であり、相手の最新実時刻と一致しない（遅延分過去の値となる）。ここでは、遅延と実行順序を含むモデルとして定式化する。
 初期条件は理想モデルと同様に、 $T_c(0)=T_i(0)=0 \, (\forall i)$ とする。
 
-アセット $i$（ $i=1,\ldots,n$ ）の $k$ 回目カウントアップウォール時刻を $t_i^{(k)}$ 、コアの  $k$ 回目カウントアップ時刻を $t_c^{(k)}$ とする。
-また、 $\Delta\tau_{c\to i}, \Delta\tau_{i\to c}$ をアセット $i$ ごとの双方向実効遅延とし、
+$\Delta\tau \ge 0$ を実効遅延ウォール時間とし、
 
-- 通信時間
-- アルゴリズムのCPU実行処理時間
-- スケジューリング待ち時間
-
-を含む（すべてウォール時間単位）。
-
-このとき観測値を以下で定義する（以下変数は、大文字はシミュレーション時刻単位、小文字はウォール時刻単位であることに注意）。
-
-$$
-\widetilde{T}_{c\to i}^{(k)} = T_c\left(t_i^{(k)} - \Delta\tau_{c\to i}\right) \ldots \text{アセット $i$ が観測できるコア時刻}
-$$
+| | |
+|:----------------------|:-------------------------|
+|$\Delta \tau_{comm}$   | 通信時間(communication) |
+|$\Delta \tau_{switch}$ | コンテキストスイッチ時間(switch) |
+|$\Delta \tau_{wait}$   | スケジューリング待ち時間(wait)|
+|$\Delta \tau_{run}$    |アルゴリズムのCPU実行処理時間(run)|
+| | |
 
 $$
-\widetilde{T}_{i\to c}^{(k)} = T_i\left(t_c^{(k)} - \Delta\tau_{i\to c}\right) \ldots \text{コアが観測できるアセット $i$ 時刻}
+\Delta \tau = \Delta \tau_{comm} + \Delta \tau_{switch} + \Delta \tau_{wait} + \Delta \tau_{run}
 $$
 
-ここで $\Delta\tau_{c\to i}, \Delta\tau_{i\to c} \ge 0$ であり、対称遅延なら $\Delta\tau_{c\to i} = \Delta\tau_{i\to c} = \Delta\tau$ とおける。
-順序差（同一ウォール時刻内で Core/Asset のどちらが先に実行されるか）も、この実効遅延に吸収して評価する。
+を含むとする（すべてウォール時間単位）。 $\Delta\tau = 0$ が理想モデルとして扱ったケースである。
+
+この遅延時間は、アセット毎にまた方向毎に異なる可能性があるので、 $2i$ 個の変数
+$$
+\Delta\tau_{c\to i}\quad (i = 1, \ldots, n) \ldots コアが観測できるアセット時刻の遅延（ウォール時間）
+$$
+$$
+\Delta\tau_{i\to c}\quad (i = 1, \ldots, n) \ldots アセットが観測できるコア時刻の遅延（ウォール時間）
+$$
+を用意する。このとき観測値を以下で定義する（大文字はシミュレーション時刻単位、小文字はウォール時刻単位であることに注意）。
+
+$$
+\widetilde{T}_c(t) = T_c\left(t - \Delta\tau_{c\to i}\right) \ldots \text{アセット $i$ が観測できるコア時刻}
+$$
+
+$$
+\widetilde{T}_i(t) = T_i\left(t - \Delta\tau_{i\to c}\right) \ldots \text{コアが観測できるアセット $i$ 時刻}
+$$
+
+$\Delta \tau_{run}$ が相対的に小さく、対称遅延なら $\Delta\tau_{c\to i} = \Delta\tau_{i\to c} = \Delta\tau$ とおける。
+また、順序差（同一ウォール時刻で Core/Asset のどちらが先に実行されるか）もこの実効遅延に吸収して評価する。
 
 ### アセット側更新（観測値ベース）
 
-アセット $i$ は、現在の $T_c$ ではなく観測値 $\widetilde{T}_{c\to i}^{(k)}$ に基づいて更新可否を判定する。
+アセット $i$ は、現在の $T_c$ ではなく観測値 $\widetilde{T}_c$ に基づいて更新可否を判定する。
 
 $$
 T_i' = T_i + \Delta T_i
@@ -482,67 +496,91 @@ $$
 $$
 T_i \leftarrow
 \begin{cases}
-T_i' & (T_i' \leq \widetilde{T}_{c\to i}^{(k)}) \\
-T_i  & (\widetilde{T}_{c\to i}^{(k)} < T_i')
+T_i' & (T_i' \leq \widetilde{T}_c) \\
+T_i(\text{as-is})  & (\widetilde{T}_c < T_i')
 \end{cases}
 $$
 
-更新後、アセットはその時点のコア時刻を観測し、次回判定に用いる観測値として保持する。
-
 ### コア側更新（観測値ベース）
 
-コアは、 $T_i$ ではなく観測値 $\widetilde{T}_{i\to c}^{(k)}$ に基づいて更新可否を判定する。
+コアは、 $T_i$ ではなく観測値 $\widetilde{T}_c$ に基づいて更新可否を判定する。
 
 $$
 T_c' = T_c + \Delta T_c
 $$
 
 $$
-\widetilde{D}_{max}' = \max_i\left(T_c' - \widetilde{T}_{i\to c}^{(k)}\right)
+\widetilde{D}_{max}' = \max_i\left(T_c' - \widetilde{T}_i \right)
 $$
 
 $$
 T_c \leftarrow
 \begin{cases}
 T_c' & (\widetilde{D}_{max}' \leq D_{max}) \\
-T_c  & (D_{max} < \widetilde{D}_{max}')
+T_c(\text{as-is})  & (D_{max} < \widetilde{D}_{max}')
 \end{cases}
 $$
 
-更新後、コアはその時点の各アセット時刻を観測し、次回判定に用いる観測値として保持する。
-
 ### 安全性の保証
-この一般化の下でも、単調増加性 $T_i(t-\Delta\tau) \le T_i(t)$ により、コア更新判定
+この一般化の下でも、$T_c$ の単調増加性 $\widetilde{T}_c(t) = T_c(t-\Delta\tau_{c\to i}) \le T_c(t)$ とアセット更新判定から、
 
 $$
-T_c' - \widetilde{T}_{i\to c}^{(k)} \le D_{max}
+\widetilde{T}_c \le T_c, \quad T_i \le \widetilde{T}_c
 $$
 
-から
+従って、
 
 $$
-T_c(t) - T_i(t) \le D_{max}
+T_i \le T_c \quad (\forall i)
 $$
 
-が従う。したがって、安全性としての最大遅延時間（コアとアセットの**シミュレーション時刻差**の上界）は、依然として $D_{max}$ である。
+が保証されます。
+
+また、$T_i$ の単調増加性 $\widetilde{T}_i(t) = T_i(t-\Delta\tau_{i\to c}) \le T_i(t)$ と、コアの更新規則 から、
+
+$$
+\widetilde{T}_i \le  T_i , \quad T_c - \widetilde{T}_i \le D_{max}
+$$
+
+という関係を得ます。これらを組み合わせると、
+
+$$
+T_c(t) - T_i(t) \le D_{max} \quad (\forall i)
+$$
+
+が保証されることがわかります。
+
+以上より、 アセットはコアを追い越さず、コアは安全性としての最大遅延時間（コアとアセットの**シミュレーション時刻差**の上界）は依然として $D_{max}$ である。すなわち、任意のウォール時刻において、
+
+$$
+\max_i T_i \le T_c \le \min_i T_i + D_{max}
+$$
+
+となり、式(c.3)(c.4)(c.5) がそのまま保存される。
+
+このモデルでは過去の時刻の値をお互いに読み合い、その時刻は現在時刻より遅れているので、 **遅延は安全性条件については保守的に働く** 。
 
 ### 進行性への影響
 
-一方で、$\Delta\tau$ は進行性に影響する。観測誤差の上界は、例えば整数上限値関数 $\lceil x \rceil$ を使って、
+（3/19 推敲中。ウォールで一時的にデッドロックしたとしても、遅延時間後に解消するのでは？）
+
+一方で、$\Delta\tau$ は進行性に影響する。シミュレーション時刻に与える **観測誤差の上界** は、例えば天井関数 $\lceil x \rceil = \min  \{ n \in \mathbf{Z} \mid x \le n\}$ を使った $\Delta\tau$ の関数として、
 
 $$
-E_i(\Delta\tau) = \left\lceil \frac{\Delta\tau_{i\to c}}{\Delta t_i} \right\rceil \Delta T_i
+E_i(\Delta\tau) = \left\lceil \frac{\Delta\tau}{\Delta t_i} \right\rceil \Delta T_i
 $$
 
 $$
-E_{c,i}(\Delta\tau) = \left\lceil \frac{\Delta\tau_{c\to i}}{\Delta t_c} \right\rceil \Delta T_c
+E_c(\Delta\tau) = \left\lceil \frac{\Delta\tau}{\Delta t_c} \right\rceil \Delta T_c
 $$
 
-で評価できる。ここで $E_i, E_{c,i}$ は**シミュレーション時刻単位**の観測誤差上界である。
+で評価できる。上記 $\lceil x \rceil$ は、遅延が「何回分のカウントアップチャンスに対応するか」に対応し、
+$E_i, E_c$ は「そのチャンスがすべてカウントアップにて増加できた場合に、増加していない過去値を観測値として使うことによる観測誤差」、
+すなわち、**シミュレーション時刻単位**の観測誤差上界である。
 厳密評価では、進行性条件に使う総観測誤差上界を各アセット $i$ について
 
 $$
-E_i^{tot} = E_i(\Delta\tau_{i\to c}) + E_{c,i}(\Delta\tau_{c\to i})
+E_i^{tot} = E_i(\Delta\tau_{i\to c}) + E_c(\Delta\tau_{c\to i})
 $$
 
 と定義する。進行性を担保するには、遅延なしの条件 $\Delta T_c + \Delta T_i \le D_{max}$ ではなく、厳密な観測誤差上界を見込んだ
@@ -559,23 +597,23 @@ $$
 
 を用いてもよい。
 
-例えば、遅延がすべて等しくカウントアップ間隔（これも等しい）の $n_h$ 倍であれば、
+例えば、遅延がすべて等しくカウントアップ間隔（これも等しい）の $m$ 倍であれば、
 
 $$
-\Delta\tau_{i\to c} = \Delta\tau_{c\to i} = n_h\Delta t, \quad \Delta t_i = \Delta t_c = \Delta t
+\Delta\tau_{i\to c} = \Delta\tau_{c\to i} = m\Delta t, \quad \Delta t_i = \Delta t_c = \Delta t
 $$
 
 となり、
 
 $$
-E_i = \left\lceil \frac{n_h\Delta t}{\Delta t} \right\rceil \Delta T_i = n_h\Delta T_i, \quad
+E_i = \left\lceil \frac{n_h\Delta t}{\Delta t} \right\rceil \Delta T_i = m\Delta T_i, \quad
 E_{c,i} = n_h\Delta T_c
 $$
 
 より
 
 $$
-E_i^{tot} = n_h\left(\Delta T_i + \Delta T_c\right)
+E_i^{tot} = m\left(\Delta T_i + \Delta T_c\right)
 $$
 
 である。したがって進行性条件は
@@ -587,7 +625,11 @@ $$
 から
 
 $$
-(n_h + 1)\left(\Delta T_c + \Delta T_i\right) \le D_{max} \quad (\forall i)
+(m + 1)\left(\Delta T_c + \Delta T_i\right) \le D_{max} \quad (\forall i)
+$$
+
+$$
+(m + 1)\left(\Delta T_c + \max_i \Delta T_i\right) \le D_{max}
 $$
 
 と書ける。
