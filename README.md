@@ -65,6 +65,9 @@ Those belong to individual component repositories
   - コア機能（Normative）: [箱庭のコア機能（最小意味論）](src/architecture/core-functions-ja.md) (`src/architecture/core-functions-ja.md`)
   - リポジトリ対応表（Appendix）: [リポジトリ対応表](src/architecture/repository-mapping-ja.md) (`src/architecture/repository-mapping-ja.md`)
   - 図版一覧（Informative）: [図版一覧](src/architecture/diagrams-ja.md) (`src/architecture/diagrams-ja.md`)
+- Mathematical supplements
+  - [Time-synchronization theory](src/math/hakoniwa-time.md) (Japanese)
+  - [Implementation-aware clock-skew bound: single-level configuration](src/math/hakoniwa-time-impl.md) (Informative; Japanese with an English theorem summary)
 
 ---
 
