@@ -65,6 +65,8 @@ $$
 
 を満たす。全アセットを同一瞬間に観測する必要も、観測の遅延上限を設定する必要もない。過去の実行の値、未来値、破損値は含めない。
 
+観測列そのものが単調に最新値へ更新されることまでは要求しない。同じ実行内の有効な古い値を再び読んでも、その値が更新確定直前の真のカウンタ以下であればよい。
+
 **A4：数値と共有状態の健全性。** 時刻値を途中で壊れた値として読み取らず、加減算・符号反転・比較にオーバーフロー等がないものとする。各時刻の確定済み更新を事象列として扱えることを前提とする。C++メモリモデル、共有メモリの読み書きの原子性、全プラットフォームでの実装健全性そのものを、本稿の比較式の証明から導いたとはしない。
 
 **A5：ウォール時刻との対応。** 有限のウォール時間区間内に無限回の更新が集中しないものとし、カウンタは更新の確定時に値が変わり、それ以外では一定とする。更新順序や処理速度の一致、公平なスケジューリング、必ず更新が完了することは、安全性の前提としない。
@@ -213,6 +215,8 @@ $$
 
 これは同一ウォール時刻での確定済みカウンタ間の保証である。異なるウォール時刻に取得したログ値をそのまま比較する主張ではない。
 
+すべてのアセットがコアの後方にあるため、三角不等式だけから得られる粗い上界 $2(D_{\max}+\Delta T_c)$ ではなく、式(9)の幅で抑えられる。
+
 ### 5.1. なぜ追加項は $\Delta T_c$ だけなのか
 
 コアだけが「現在の差」を判定してから進むため、その1回分の増分が上界に加わる。アセットは「次の時刻」でコアを追い越さないことを確認しているため、別途 $\Delta T_i$ を足す必要はない。$\Delta T_i$ が大きすぎて進行できなくても、安全性自体は成立する。
@@ -264,6 +268,8 @@ $$
 | コアがさらに1回進行 | 110 | 1 | 10 | 判定時の最大差 $100-1=99<100$ |
 | アセット2がコアに追いつく | 110 | 1 | 110 | アセット2は10刻みで追いつける |
 
+通知が更新前に行われる対象実装でも、この確定時刻列は実現できる。アセット1は時刻1を次回の `hako_asset_impl_execute()` の冒頭で通知した後、次の時刻確定まで一時停止させればよい。アセット2も時刻10を通知した後に待機し、その後コアへ追いつく。永久停止や未来時刻の通知は必要ない。
+
 最後の状態では
 
 $$
@@ -277,6 +283,8 @@ $$
 $$
 
 したがって、現行実装に対して無条件に $|T_i-T_j|\le D_{\max}$ と記載することはできない。式(10)の整数時間上界に達する構成も存在する。ただし、すべてのパラメータ構成でこの上界に達するという主張ではない。
+
+量子化しないモデルでも、$D_{\max}=\Delta T_c=a>0$、アセット増分を $\varepsilon$ と $a$（$0<\varepsilon<a$）とすれば、同様に $(T_c,T_1,T_2)=(2a,\varepsilon,2a)$ へ到達できる。幅は $2a-\varepsilon$ であり、$\varepsilon\to0^+$ により $D_{\max}+\Delta T_c$ に任意に近づく。したがって、刻み幅について追加条件を置かずに補正項を一律に取り除くことはできない。
 
 ### 6.3. 刻みがそろう場合には、より強い $D_{\max}$ 上界も成立する
 
@@ -303,6 +311,21 @@ $$
 本証明からは、デッドロック回避、実時間に対する遅れ、通信の到達期限、物理シミュレーションの数値精度、PDUの因果順序、多段構成の上界は結論しない。また、実験の時刻が外部シミュレータ自身の時計やPDUタイムスタンプである場合は、それと $T_i$ の対応を別途確認する必要がある。
 
 コアの `get_asset_times()` は登録済みエントリの時刻を順次読み出す [S6]。全体の同時スナップショットを要求しないことと、各読み取りが健全であることは別の条件であり、後者はA3、A4に残る。実装全体を形式検証済みと表現しない。
+
+### 7.1. 英文記述案（定理と証明の要約）
+
+**Implementation-aware clock-skew bound for a single-level configuration.**
+Consider one core and a fixed, nonempty set of synchronized assets. Let $T_c$ and $T_i$ denote their committed simulation times, respectively. The implementation advances the core by a fixed $\Delta T_c>0$ only if $T_c-\widetilde T_i<D_{\max}$ for every asset, whereas asset $i$ advances by a fixed $\Delta T_i>0$ only if $T_i+\Delta T_i\le\widetilde T_{c,i}$. Here $D_{\max}>0$ is the configured stopping threshold, not necessarily the maximum realized skew. Under assumptions A1–A5, all clocks start at zero, each component serializes its own updates, reads and arithmetic are sound, and no rollback, membership change, or parameter change occurs. Observations are valid committed times from the same execution and may be stale: $\widetilde T_i\le T_i$ and $\widetilde T_{c,i}\le T_c$ at update commitment. Only finitely many committed updates occur in a finite wall-clock interval.
+
+For every wall-clock time $t$ in the execution,
+
+$$
+0\le T_c(t)-T_i(t)<D_{\max}+\Delta T_c,
+\qquad
+\max_iT_i(t)-\min_iT_i(t)<D_{\max}+\Delta T_c.
+$$
+
+*Proof.* The invariant holds initially. On a core update, $T_c^+-T_i\le T_c+\Delta T_c-\widetilde T_i<D_{\max}+\Delta T_c$, and increasing the core time preserves $T_i\le T_c$. On an asset update, $T_i^+\le\widetilde T_{c,i}\le T_c$, while increasing $T_i$ can only decrease its lag behind the core. Stuttering and observation updates leave committed times unchanged. Induction over committed updates establishes the invariant, which also holds between updates. Since all asset times lie at or behind the core, their spread is at most $T_c-\min_iT_i$. Every pairwise difference is bounded by this spread. Thus the current-time guard introduces less than one core time step of additional skew, without accumulation over the execution. This is a safety result; liveness, physical simulation accuracy, and correctness of the complete shared-memory implementation are not claimed.
 
 ## 8. 再現可能な補助検証
 
